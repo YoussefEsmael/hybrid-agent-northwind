@@ -53,9 +53,10 @@ Even on a small 10-example evaluation split, DSPy templates + repair improved SQ
 
 ## Key Assumptions
 
-1. **Date Mapping**: Questions reference "1997" but Northwind DB has 2016-2018 data. Agent automatically maps:
+1. **Date Mapping**: Questions reference "1997" but Northwind DB provided in the Assignment only has 2016-2018 data. Agent automatically maps:
    - "Summer Beverages 1997" → 2016-06-01 to 2016-06-30
    - "Winter Classics 1997" → 2016-12-01 to 2016-12-31
+   - 
    - Generic "1997" → "2016"
 
 2. **Gross Margin**: Cost of Goods approximated as 70% of UnitPrice (per assignment spec)
