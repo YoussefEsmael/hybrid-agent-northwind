@@ -1,16 +1,9 @@
-"""
-agent/dspy_signatures.py
-COMPLETE FIXED VERSION - All 3 critical bugs resolved
-"""
+
 
 import dspy
 import re
 from dspy import Signature, InputField, OutputField
 
-
-# ==============================================================================
-# SIGNATURES
-# ==============================================================================
 
 class RouterSignature(Signature):
     """Route query to appropriate data sources - IMPROVED"""
@@ -32,7 +25,6 @@ class PlannerSignature(Signature):
     """Extract ALL structured information from query - COMPLETE VERSION"""
     question = InputField(desc="User's question")
     
-    # Required outputs - ALL fields must be populated
     date_range = OutputField(desc="Date range in format 'YYYY-MM-DD to YYYY-MM-DD' or 'None'. Examples: '1997-06-01 to 1997-06-30', '1997-12-01 to 1997-12-31'")
     kpi_formula = OutputField(desc="KPI formula mentioned (AOV, Gross Margin, Revenue) or 'None'. If AOV mentioned, output 'AOV'. If margin mentioned, output 'Gross Margin'.")
     categories = OutputField(desc="Product categories mentioned: Beverages, Condiments, Confections, Dairy Products, etc. Comma-separated or 'None'")
@@ -217,7 +209,6 @@ class PlannerModule(dspy.Module):
         
         q_lower = question.lower()
         
-        # CRITICAL FIX: Map 1997 campaigns to actual DB dates
         date_range = result.date_range
         
         # Check for known campaigns
@@ -227,7 +218,6 @@ class PlannerModule(dspy.Module):
                 print(f"   📅 Mapped '{campaign}' → {actual_dates}")
                 break
         
-        # If question mentions just "1997" without campaign, map to 2016
         if '1997' in q_lower and date_range and '1997' in date_range:
             date_range = date_range.replace('1997', '2016')
             print(f"   📅 Mapped year: 1997 → 2016")
@@ -419,10 +409,6 @@ class SynthesizerModule(dspy.Module):
         FIXED: Fallback extraction with proper prioritization
         BUG FIX: Don't extract year numbers from docs for structured data
         """
-        
-        # =====================================================================
-        # PART 1: Try SQL Results First (HIGHEST PRIORITY)
-        # =====================================================================
         if sql_results and sql_results != "NO SQL RESULTS":
             # Check if we have actual row data
             if "Row 1:" in sql_results:
@@ -557,7 +543,6 @@ class SynthesizerModule(dspy.Module):
                     )
             
             # Pattern 4: Generic number extraction - ONLY for simple int/float WITHOUT dict/list
-            # BUG FIX: Don't extract years (1997) from docs when expecting structured data!
             if ('int' in format_hint or 'float' in format_hint) and 'dict' not in format_hint and 'list' not in format_hint:
                 # Only extract if it's a pure RAG question (not hybrid)
                 if 'return' in q_lower or 'policy' in q_lower or 'definition' in q_lower:
