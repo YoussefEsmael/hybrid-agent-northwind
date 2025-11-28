@@ -1,8 +1,4 @@
-"""
-agent/graph_hybrid.py
-LangGraph orchestration with all required nodes and repair loop
-COMPLETE FIXED VERSION - All bugs resolved + 3 critical fixes applied
-"""
+
 
 import json
 from typing import TypedDict, Annotated, List, Dict, Any
@@ -285,9 +281,7 @@ CRITICAL REMINDERS:
         fixed_sql = sql
         import re
         
-        # ================================================================
-        # FIX 0: Empty results - CRITICAL date range fix
-        # ================================================================
+
         if ("Query returned 0 rows" in error or not error) and len(state.get("sql_results", [])) == 0:
             print(f"   → Checking for date range issues in SQL...")
             
@@ -332,7 +326,6 @@ CRITICAL REMINDERS:
                                 )
                                 print(f"   → Replaced LIKE with: >= '{start_date}' AND < '{next_day}'")
                             
-                            # Pattern 3: >= and <= (change to <)
                             else:
                                 fixed_sql = re.sub(
                                     r"WHERE\s+.*?OrderDate\s*>=\s*'[^']+'\s+AND\s+.*?OrderDate\s*<=\s*'[^']+'",
@@ -352,17 +345,13 @@ CRITICAL REMINDERS:
                     except Exception as e:
                         print(f"   ⚠️  Date fix failed: {e}")
         
-        # ================================================================
-        # FIX 1: Table name errors
-        # ================================================================
+
         if "no such table: OrderDetails" in error or "no such table: order_details" in error:
             print(f"   → Fixing: OrderDetails → \"Order Details\"")
             fixed_sql = re.sub(r'\bOrderDetails\b', '"Order Details"', fixed_sql, flags=re.IGNORECASE)
             fixed_sql = re.sub(r'\border_details\b', '"Order Details"', fixed_sql, flags=re.IGNORECASE)
         
-        # ================================================================
-        # FIX 2: Missing Categories JOIN
-        # ================================================================
+
         if "no such column: c.CategoryName" in error:
             print(f"   → Missing JOIN to Categories table")
             if "categories" not in fixed_sql.lower():
@@ -405,35 +394,27 @@ CRITICAL REMINDERS:
                     LIMIT 1
                     """
         
-        # ================================================================
-        # FIX 3: Wrong table alias for columns
-        # ================================================================
+
         if "no such column: o.Discount" in error or "no such column: o.UnitPrice" in error or "no such column: o.Quantity" in error:
             print(f"   → Fixing column aliases: o.* → od.*")
             fixed_sql = re.sub(r'\bo\.UnitPrice\b', 'od.UnitPrice', fixed_sql, flags=re.IGNORECASE)
             fixed_sql = re.sub(r'\bo\.Quantity\b', 'od.Quantity', fixed_sql, flags=re.IGNORECASE)
             fixed_sql = re.sub(r'\bo\.Discount\b', 'od.Discount', fixed_sql, flags=re.IGNORECASE)
         
-        # ================================================================
-        # FIX 4: Quoted column names
-        # ================================================================
+
         if 'o."UnitPrice"' in fixed_sql or 'o."Quantity"' in fixed_sql:
             print(f"   → Removing quotes from column names")
             fixed_sql = re.sub(r'o\."UnitPrice"', 'od.UnitPrice', fixed_sql)
             fixed_sql = re.sub(r'o\."Quantity"', 'od.Quantity', fixed_sql)
             fixed_sql = re.sub(r'o\."Discount"', 'od.Discount', fixed_sql)
         
-        # ================================================================
-        # FIX 5: SQLite date functions
-        # ================================================================
+
         if "no such function" in error.lower() or "YEAR(" in fixed_sql or "MONTH(" in fixed_sql:
             print(f"   → Removing unsupported date functions")
             fixed_sql = re.sub(r"YEAR\(([^)]+)\)\s*=\s*'?(\d+)'?", r"\1 LIKE '\2-%'", fixed_sql, flags=re.IGNORECASE)
             fixed_sql = re.sub(r"MONTH\(([^)]+)\)\s*=\s*'?(\d+)'?", r"\1 LIKE '____-\2-%'", fixed_sql, flags=re.IGNORECASE)
         
-        # ================================================================
-        # FIX 6: Aggregate misuse
-        # ================================================================
+
         if "misuse of aggregate" in error.lower():
             print(f"   → Fixing nested aggregates")
             if "AVG(" in fixed_sql and "SUM(" in fixed_sql:
@@ -464,9 +445,7 @@ CRITICAL REMINDERS:
                 """
                 print(f"   → Using AOV template with CAST")
         
-        # ================================================================
-        # FIX 7: SQL syntax error with division (AOV calculations)
-        # ================================================================
+
         if 'syntax error' in error.lower() and '/' in fixed_sql:
             print(f"   → Division syntax error detected")
     
@@ -655,9 +634,7 @@ CRITICAL REMINDERS:
         
         return state
     
-    # ========================================================================
-    # ROUTING FUNCTIONS (FIXED)
-    # ========================================================================
+
     
     def route_after_planner(self, state: AgentState) -> str:
         """Route after planning based on route decision"""
@@ -705,9 +682,6 @@ CRITICAL REMINDERS:
         else:
             return "continue"
     
-    # ========================================================================
-    # PUBLIC API
-    # ========================================================================
     
     def run(self, q_id: str, question: str, format_hint: str = "", thread_id: str = "default") -> Dict[str, Any]:
         """
