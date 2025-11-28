@@ -1,7 +1,4 @@
-"""
-agent/tools/sqlite_tool.py
-SQLite query execution and schema extraction - FULLY CORRECTED
-"""
+
 
 import sqlite3
 import json
