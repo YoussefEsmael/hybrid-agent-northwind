@@ -1,10 +1,4 @@
-"""
-run_agent_hybrid.py
-Main CLI runner for the hybrid agent - autograder-ready version
-Loads id, question, format_hint from JSONL and writes outputs with id.
 
-FIXED VERSION - All bugs corrected
-"""
 
 import argparse
 import json
@@ -85,7 +79,6 @@ def run_batch(agent: HybridAgent, input_file: str, output_file: str):
         format_hint = item.get("format_hint", "")
         print(f"\n[{i+1}/{len(items)}] ({qid}) {question[:80]}...")
         
-        # FIX: Pass qid as first argument
         out = agent.run(qid, question, format_hint=format_hint, thread_id=f"batch_{i}")
         
         # Ensure grader contract fields:
@@ -195,7 +188,6 @@ def main():
         run_batch(agent, args.batch, args.out)
 
     else:
-        # Interactive mode
         print("\n" + "=" * 70)
         print("Interactive Mode - Type 'quit' to exit")
         print("=" * 70)
