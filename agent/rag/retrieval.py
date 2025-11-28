@@ -1,7 +1,3 @@
-"""
-agent/rag/retrieval.py
-Final corrected BM25-based retriever - fully autograder compliant
-"""
 
 import os
 import re
